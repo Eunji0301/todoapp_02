@@ -1,42 +1,41 @@
 'use client';
 import * as React from 'react';
-import Button from '@mui/material/Button';
+import { FaBars } from 'react-icons/fa';
+import { AppBar, Toolbar, Button, Alert, Snackbar } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import theme from './theme';
-import { RiDeleteBin5Line } from 'react-icons/ri';
 
-export default function Home() {
+export default function App() {
+  const [open, setOpen] = React.useState(false);
   return (
     <>
       <ThemeProvider theme={theme}>
-        <div className="tw-flex tw-items-center tw-gap-x-3">
-          <Button variant="text">Text</Button>
-          <Button variant="contained">Contained</Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              confirm('삭제함?');
-            }}>
-            삭제
-            <RiDeleteBin5Line />
-          </Button>
-        </div>
+        <AppBar position="fixed">
+          <Toolbar className="">
+            <div className="tw-flex-1 ">
+              <FaBars />
+            </div>
+            <div>
+              <a href="/" className="tw-font-bold">
+                로고
+              </a>
+            </div>
+            <div className="tw-flex-1 tw-flex tw-justify-end">글쓰기</div>
+          </Toolbar>
+        </AppBar>
+        <section className="tw-h-96 tw-flex tw-justify-center tw-items-center">section </section>
       </ThemeProvider>
-      <div className="tw-flex tw-items-center tw-gap-x-3 tw-mt-3">
-        <Button
-          variant="text"
-          onClick={() => {
-            alert('버튼 클릭 됨');
-          }}>
-          Text
-        </Button>
-        <Button variant="contained" disabled>
-          Contained
-        </Button>
-        <Button variant="outlined" href="sub/">
-          sub로 이동
-        </Button>
-      </div>
+      <section>
+        <Button onClick={() => setOpen(true)}>open snackbar</Button>
+        <Alert>게시글이 등록됨</Alert>
+        <Snackbar
+          open={open}
+          autoHideDuration={2000}
+          onClose={() => setOpen(false)}
+          message="Note archived">
+          <Alert severity="error">게시물 삭제</Alert>
+        </Snackbar>
+      </section>
     </>
   );
 }
