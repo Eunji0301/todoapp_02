@@ -1,22 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import {
-  AppBar,
-  Toolbar,
-  Button,
-  Alert as MuiAlert,
-  Snackbar,
-  Backdrop,
-  CircularProgress,
-  Drawer,
-  List,
-  ListItemButton,
-  Link,
-  ListItem,
-  Tabs,
-  Tab,
-} from '@mui/material';
+import { AppBar, Toolbar, Button, Alert as MuiAlert, TextField } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import { FaBars } from 'react-icons/fa';
 import theme from './theme';
@@ -180,10 +165,16 @@ export default function App() {
           </Toolbar>
         </AppBar>
         <Toolbar />
-        <form onSubmit={onSubmit}>
-          <input type="text" name="title" autoComplete="off" placeholder="할 일 입력" />
-          <button type="submit">추가</button>
-          <button type="reset">취소</button>
+        <form className="tw-flex tw-flex-col tw-p-4 tw-gap-3" onSubmit={onSubmit}>
+          <TextField
+            id="outlined-basic"
+            label="할 일 뭐임?"
+            variant="outlined"
+            autoComplete="off"
+          />
+          <Button variant="contained" type="submit">
+            추가
+          </Button>
         </form>
         {todoState.todos.length}
         {/* {todoState.todos} */}
