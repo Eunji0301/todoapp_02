@@ -1,11 +1,11 @@
 'use client';
+
 import * as React from 'react';
-import { FaBars } from 'react-icons/fa';
 import {
   AppBar,
   Toolbar,
   Button,
-  Alert,
+  Alert as MuiAlert,
   Snackbar,
   Backdrop,
   CircularProgress,
@@ -13,28 +13,165 @@ import {
   List,
   ListItemButton,
   Link,
+  ListItem,
   Tabs,
   Tab,
-  ListItem,
 } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
+import { FaBars } from 'react-icons/fa';
 import theme from './theme';
 
-export default function App() {
-  const [tabCurrentIndex, setTabCurrentIndex] = React.useState(0);
-  const toggleDrawer = (newOpen) => () => {
-    setOpen(newOpen);
+const useTodoStatus = () => {
+  const [todos, setTodos] = React.useState([]);
+  const lastTodoIdRef = React.useRef(0);
+
+  const addTodo = (newTitle) => {
+    const id = ++lastTodoIdRef.current;
+    const newTodo = {
+      id,
+      title: newTitle,
+      regDate: dateToStr(new Date()),
+    };
+    setTodos([...todos, newTodo]);
   };
-  const [open, setOpen] = React.useState(false);
+  const removeTodo = (id) => {
+    const newTodos = todos.filter((todo) => todo.id != id);
+    setTodos(newTodos);
+  };
+  const modifyTodo = (id, title) => {
+    const newTodos = todos.map((todo) => (todo.id != id ? todo : { ...todo, title }));
+    setTodos(newTodos);
+  };
+  return {
+    todos,
+    addTodo,
+    removeTodo,
+    modifyTodo,
+  };
+};
+
+const NewTodoForm = ({ todoStatus }) => {
+  const [newTodoTitle, setNewTodoTitle] = useState('');
+  const addTodo = () => {
+    if (newTodoTitle.trim().length == 0) return;
+    const title = newTodoTitle.trim();
+    todoStatusaddTodo(title);
+    setNewTodoTitle('');
+  };
+  return (
+    <>
+      <div className="flex items-center gap-x-3">
+        <input
+          className="input input-bordered"
+          type="text"
+          placeholder="새 할일 입력해"
+          value={newTodoTitle}
+          onChange={(e) => setNewTodoTitle(e.target.value)}
+        />
+        <button className="btn btn-primary" onClick={addTodo}>
+          할 일 추가
+        </button>
+      </div>
+    </>
+  );
+};
+const TodoListItem = ({ todo, todoStatus }) => {
+  const [editMode, setEditMode] = useState(false);
+  const [newTodoTitle, setNewTodoTitle] = useState(todo.title);
+  const readMode = !editMode;
+  const enableEditMode = () => {
+    setEditMode(true);
+  };
+  const removeTodo = () => {
+    todoStatus.removeTodo(todo.id);
+  };
+  const cancleEdit = () => {
+    setEditMode(false);
+    setNewTodoTitle(todo.title);
+  };
+  const commitEdit = () => {
+    if (newTodoTitle.trim().length == 0) return;
+    todoStatus.modifyTodo(todo.id, newTodoTitle.trim());
+    setEditMode(false);
+  };
+  return (
+    <li className="flex items-center gap-x-3 mb-3">
+      <span className="badge badge-accent badge-outline">{todo.id}</span>
+      {readMode ? (
+        <>
+          <span>{todo.title}</span>
+          <button className="btn btn-outline btn-accent" onClick={enableEditMode}>
+            수정
+          </button>
+          <button className="btn btn-accent" onClick={removeTodo}>
+            삭제
+          </button>
+        </>
+      ) : (
+        <>
+          <input
+            className="input input-bordered"
+            type="text"
+            placeholder="할 일 써"
+            value={newTodoTitle}
+            onChange={(e) => setNewTodoTitle(e.target.value)}
+          />
+          <button className="btn btn-accent" onClick={commitEdit}>
+            수정완료
+          </button>
+          <button className="btn btn-accent" onClick={cancleEdit}>
+            수정취소
+          </button>
+        </>
+      )}
+    </li>
+  );
+};
+const TodoList = ({ todoStatus }) => {
+  return (
+    <>
+      {todoStatus.todos.length == 0 ? (
+        <h4>할 일 없음</h4>
+      ) : (
+        <>
+          <h4>할 일 목록</h4>
+          <ul>
+            {todoStatus.todos.map((todo) => (
+              <TodoListItem key={todo.id} todo={todo} todoStatus={todoStatus} />
+            ))}
+          </ul>
+        </>
+      )}
+    </>
+  );
+};
+
+export default function App() {
+  const todoState = useTodoStatus(); // 커스텀 훅
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    form.title.value = form.title.value.trim();
+    if (form.title.value.length == 0) {
+      alert('할 일 써');
+      form.title.focus();
+      return;
+    }
+    todoState.addTodo(form.title.value);
+    form.title.value = '';
+    form.title.focus();
+  };
+
   return (
     <>
       <ThemeProvider theme={theme}>
         <AppBar position="fixed">
-          <Toolbar className="">
-            <div className="tw-flex-1 ">
+          <Toolbar>
+            <div className="tw-flex-1">
               <FaBars onClick={() => setOpen(true)} className="tw-cursor-pointer" />
             </div>
-            <div>
+            <div className="logo-box">
               <a href="/" className="tw-font-bold">
                 로고
               </a>
@@ -42,43 +179,36 @@ export default function App() {
             <div className="tw-flex-1 tw-flex tw-justify-end">글쓰기</div>
           </Toolbar>
         </AppBar>
-        <section className="tw-h-96 tw-flex tw-justify-center tw-items-center">section </section>
+        <Toolbar />
+        <form onSubmit={onSubmit}>
+          <input type="text" name="title" autoComplete="off" placeholder="할 일 입력" />
+          <button type="submit">추가</button>
+          <button type="reset">취소</button>
+        </form>
+        {todoState.todos.length}
+        {/* {todoState.todos} */}
       </ThemeProvider>
-      <section>
-        <Button onClick={() => setOpen(true)}>open snackbar</Button>
-        <Alert>게시글이 등록됨</Alert>
-        <Tabs value={tabCurrentIndex} onChange={(_, newValue) => setTabCurrentIndex(newValue)}>
-          <Tab label="Item One" />
-          <Tab label="Item Two" />
-          <Tab label="Item Three" />
-        </Tabs>
-        {tabCurrentIndex == 0 && <div>내용1</div>}
-        {tabCurrentIndex == 1 && <div>내용2</div>}
-        {tabCurrentIndex == 2 && <div>내용3</div>}
-      </section>
-      <section>
-        {/* <Button onClick={() => setOpen(true)}>Show backdrop</Button> */}
-        {/* <Backdrop
-          sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
-          open={open}
-          onClick={() => setOpen(false)}>
-          <CircularProgress color="inherit" />
-        </Backdrop> */}
-        <div>
-          <Button onClick={() => setOpen(true)}>Open drawer</Button>
-          <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
-            <List>
-              <ListItemButton>
-                <Link underline="none" href="write">
-                  글쓰기
-                </Link>
-              </ListItemButton>
-              <ListItemButton>토마토</ListItemButton>
-              <ListItemButton>바나나</ListItemButton>
-            </List>
-          </Drawer>
-        </div>
-      </section>
     </>
+  );
+}
+
+// Util
+// 날짜 객체를 인자로 받아서 문장으로 반환해주는 함수 (yyyy-MM-dd hh:mm:ss)
+function dateToStr(d) {
+  const pad = (n) => {
+    return n < 10 ? '0' + n : n;
+  };
+  return (
+    d.getFullYear() +
+    '-' +
+    pad(d.getMonth() + 1) +
+    '-' +
+    pad(d.getDate()) +
+    ' ' +
+    pad(d.getHours()) +
+    ':' +
+    pad(d.getMinutes()) +
+    ':' +
+    pad(d.getSeconds())
   );
 }
