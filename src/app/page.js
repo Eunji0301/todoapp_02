@@ -3,8 +3,9 @@
 import * as React from 'react';
 import { AppBar, Toolbar, Button, Alert as MuiAlert, TextField, Chip, Box } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
-import { FaBars } from 'react-icons/fa';
-import theme from './theme';
+import classNames from 'classnames';
+import { FaBars, FaCheck, FaEllipsisV } from 'react-icons/fa';
+import RootTheme from './theme';
 import dateToStr from './dateUtil';
 
 function useTodoStatus() {
@@ -194,20 +195,37 @@ function App() {
       <div className="tw-mb-2">할 일 갯수 : {todosState.todos.length}</div>
       <nav>
         <ul>
-          {todosState.todos.map((todo) => (
+          {todosState.todos.map((todo, index) => (
             <li className="tw-mb-3" key={todo.id}>
-              <div className="tw-flex tw-flex-col tw-gap-1 tw-mb-[30px]">
-                <Chip
-                  className="tw-pt-3"
-                  color={'secondary'}
-                  label={`번호 : ${todo.id}`}
-                  variant="outlined"></Chip>
-                <Chip
-                  className="tw-pt-3"
-                  label={`날짜 : ${todo.regDate}`}
-                  variant="outlined"></Chip>
-                <div className="tw-p-8 tw-rounded-[15px] tw-shadow tw-whitespace-pre-wrap tw-leading-relaxed tw-break-words">
-                  <Box sx={{ color: 'primary.dark' }}>할 일 : {todo.content}</Box>
+              <div className="tw-flex tw-flex-col tw-gap-2 tw-mt-3">
+                <div className="tw-flex tw-gap-x-2 tw-font-bold">
+                  <Chip className="tw-pt-[3px]" label={`번호 : ${todo.id}`} variant="outlined" />
+                  <Chip
+                    className="tw-pt-[3px]"
+                    label={`날짜 : ${todo.regDate}`}
+                    variant="outlined"
+                    color="primary"
+                  />
+                </div>
+                <div className="tw-rounded-[10px] tw-shadow tw-flex tw-text-[14px] tw-min-h-[80px]">
+                  <Button className="tw-flex-shrink-0 tw-rounded-[10px_0_0_10px]" color="inherit">
+                    <FaCheck
+                      className={classNames(
+                        'tw-text-3xl',
+                        {
+                          'tw-text-[--mui-color-primary-main]': index % 2 == 0,
+                        },
+                        { 'tw-text-[#dcdcdc]': index % 2 != 0 },
+                      )}
+                    />
+                  </Button>
+                  <div className="tw-bg-[#dcdcdc] tw-w-[2px] tw-h-[60px] tw-self-center"></div>
+                  <div className="tw-bg-blue-300 tw-flex tw-items-center tw-p-3 tw-flex-grow hover:tw-text-[--mui-color-primary-main] tw-whitespace-pre-wrap tw-leading-relaxed tw-break-words">
+                    할 일 : {todo.content}
+                  </div>
+                  <Button className="tw-flex-shrink-0 tw-rounded-[0_10px_10px_0]" color="inherit">
+                    <FaEllipsisV className="tw-text-[#dcdcdc] tw-text-2xl" />
+                  </Button>
                 </div>
               </div>
             </li>
@@ -219,6 +237,7 @@ function App() {
 }
 
 export default function themeApp() {
+  const theme = RootTheme();
   console.log('실행 2');
   return (
     <ThemeProvider theme={theme}>
