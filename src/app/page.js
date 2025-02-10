@@ -1,13 +1,13 @@
 'use client';
 
 import * as React from 'react';
-import { AppBar, Toolbar, Button, Alert as MuiAlert, TextField, Chip } from '@mui/material';
+import { AppBar, Toolbar, Button, Alert as MuiAlert, TextField, Chip, Box } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import { FaBars } from 'react-icons/fa';
 import theme from './theme';
 import dateToStr from './dateUtil';
 
-const useTodoStatus = () => {
+function useTodoStatus() {
   console.log('실행 1');
   const [todos, setTodos] = React.useState([]);
   const lastTodoIdRef = React.useRef(0);
@@ -19,7 +19,7 @@ const useTodoStatus = () => {
       content: newContent,
       regDate: dateToStr(new Date()),
     };
-    setTodos((todos) => [...todos, newTodo]);
+    setTodos((todos) => [newTodo, ...todos]);
   };
   const removeTodo = (id) => {
     const newTodos = todos.filter((todo) => todo.id != id);
@@ -35,7 +35,7 @@ const useTodoStatus = () => {
     removeTodo,
     modifyTodo,
   };
-};
+}
 
 const NewTodoForm = ({ todoStatus }) => {
   const [newTodoContent, setNewTodoContent] = useState('');
@@ -135,11 +135,17 @@ const TodoList = ({ todoStatus }) => {
 
 let AppCallCount = 0;
 
-const App = () => {
+function App() {
   AppCallCount++;
   console.log(`AppCallCount : ${AppCallCount}`);
 
   const todosState = useTodoStatus(); // 커스텀 훅
+
+  React.useEffect(() => {
+    todosState.addTodo('스쿼트');
+    todosState.addTodo('벤치');
+    todosState.addTodo('데드');
+  }, []);
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -173,6 +179,8 @@ const App = () => {
       <Toolbar />
       <form className="tw-flex tw-flex-col tw-p-4 tw-gap-3" onSubmit={onSubmit}>
         <TextField
+          multiline
+          maxRows={4}
           name="content"
           id="outlined-basic"
           label="할 일 뭐임?"
@@ -189,9 +197,18 @@ const App = () => {
           {todosState.todos.map((todo) => (
             <li className="tw-mb-3" key={todo.id}>
               <div className="tw-flex tw-flex-col tw-gap-1 tw-mb-[30px]">
-                <Chip label={`번호 : ${todo.id}`} variant="outlined"></Chip>
-                <Chip label={`날짜 : ${todo.regDate}`} variant="outlined"></Chip>
-                <Chip label={`할 일 : ${todo.content}`} variant="outlined"></Chip>
+                <Chip
+                  className="tw-pt-3"
+                  color={'secondary'}
+                  label={`번호 : ${todo.id}`}
+                  variant="outlined"></Chip>
+                <Chip
+                  className="tw-pt-3"
+                  label={`날짜 : ${todo.regDate}`}
+                  variant="outlined"></Chip>
+                <div className="tw-p-8 tw-rounded-[15px] tw-shadow tw-whitespace-pre-wrap tw-leading-relaxed tw-break-words">
+                  <Box sx={{ color: 'primary.dark' }}>할 일 : {todo.content}</Box>
+                </div>
               </div>
             </li>
           ))}
@@ -199,7 +216,7 @@ const App = () => {
       </nav>
     </>
   );
-};
+}
 
 export default function themeApp() {
   console.log('실행 2');
