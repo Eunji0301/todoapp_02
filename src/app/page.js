@@ -10,6 +10,10 @@ import {
   CssBaseline,
   Chip,
   Drawer,
+  SwipeableDrawer,
+  List,
+  ListItem,
+  Divider,
   Box,
 } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
@@ -125,27 +129,57 @@ const TodoListItem = ({ todo, index, openDrawer }) => {
     </>
   );
 };
-const TodoList = ({ todosState }) => {
-  const [optionDrawerTodoId, setOptionDrawerTodoId] = React.useState(null);
 
-  const drawerOpened = React.useMemo(() => optionDrawerTodoId !== null, [optionDrawerTodoId]);
-  const openDrawer = (id) => setOptionDrawerTodoId(id);
-  const closeDrawer = () => setOptionDrawerTodoId(null);
+// 해당 todo option에 대한 drawer 열기, 닫기
+function useTodoOptionDrawerStatus() {
+  const [todoId, setTodoId] = React.useState(null);
+  const opened = React.useMemo(() => todoId !== null, [todoId]);
+
+  const open = (id) => setTodoId(id);
+  const close = () => setTodoId(null);
+  return {
+    todoId,
+    open,
+    close,
+    opened,
+  };
+}
+
+function TodoOptionDrawer({ status }) {
+  return (
+    <>
+      <SwipeableDrawer anchor="left" open={status.opened} onClose={status.close}>
+        <List>
+          <ListItem className="tw-flex tw-gap-2 tw-p-[15px]">
+            <span className="tw-text-[--mui-color-primary-main]">{status.todoId}번 </span>
+            <span>Your Todo</span>
+          </ListItem>
+          <Divider className="tw-my-[5px]" />
+          <ListItem className="tw-p-[15px_20px]">수정</ListItem>
+          <ListItem className="tw-p-[15px_20px]">삭제</ListItem>
+        </List>
+      </SwipeableDrawer>
+    </>
+  );
+}
+
+const TodoList = ({ todosState }) => {
+  const todoOptionDrawerStatus = useTodoOptionDrawerStatus();
 
   return (
     <>
-      <Drawer anchor="bottom" open={drawerOpened} onClose={closeDrawer}>
-        <div className="tw-p-[30px] tw-flex tw-gap-x-[5px]">
-          {optionDrawerTodoId}번 todo에 대한 옵션 Drawer
-          <div>수정</div>
-          <div>삭제</div>
-        </div>
-      </Drawer>
-      <div className="tw-mb-2">할 일 갯수 : {todosState.todos.length}</div>
+      <TodoOptionDrawer status={todoOptionDrawerStatus} />
+
       <nav>
+        할 일 갯수 : {todosState.todos.length}
         <ul>
           {todosState.todos.map((todo, index) => (
-            <TodoListItem key={todo.id} todo={todo} index={index} openDrawer={openDrawer} />
+            <TodoListItem
+              key={todo.id}
+              todo={todo}
+              index={index}
+              openDrawer={todoOptionDrawerStatus.open}
+            />
           ))}
         </ul>
       </nav>
