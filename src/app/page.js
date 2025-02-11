@@ -14,11 +14,14 @@ import {
   List,
   ListItem,
   Divider,
+  ListItemButton,
+  Modal,
   Box,
 } from '@mui/material';
 import { ThemeProvider } from '@emotion/react';
 import classNames from 'classnames';
-import { FaBars, FaCheck, FaEllipsisV } from 'react-icons/fa';
+import { FaBars, FaCheck, FaEllipsisH, FaTrash, FaEllipsisV } from 'react-icons/fa';
+import { FaPenToSquare } from 'react-icons/fa6';
 import dateToStr from './dateUtil';
 import RootTheme from './theme';
 
@@ -146,19 +149,41 @@ function useTodoOptionDrawerStatus() {
 }
 
 function TodoOptionDrawer({ status }) {
+  const [editTodoModalOpened, setEditTodoModalOpened] = React.useState(false);
+  const openEditModal = () => {
+    setEditTodoModalOpened(true);
+  };
+  const closeEditModal = () => {
+    setEditTodoModalOpened(false);
+  };
+
   return (
     <>
-      <SwipeableDrawer anchor="left" open={status.opened} onClose={status.close}>
+      <SwipeableDrawer anchor="top" open={status.opened} onClose={status.close} onOpen={() => {}}>
         <List>
           <ListItem className="tw-flex tw-gap-2 tw-p-[15px]">
             <span className="tw-text-[--mui-color-primary-main]">{status.todoId}번 </span>
             <span>Your Todo</span>
           </ListItem>
           <Divider className="tw-my-[5px]" />
-          <ListItem className="tw-p-[15px_20px]">수정</ListItem>
-          <ListItem className="tw-p-[15px_20px]">삭제</ListItem>
+          <ListItemButton
+            onClick={openEditModal}
+            className="tw-p-[15px_20px] tw-flex tw-gap-2 tw-items-center">
+            <span>수정</span>
+            <FaPenToSquare className="block tw-mt-[-5px]" />
+          </ListItemButton>
+          <ListItemButton className="tw-p-[15px_20px] tw-flex tw-gap-2 tw-items-center">
+            <span>삭제</span>
+            <FaTrash className="block tw-mt-[-5px]" />
+          </ListItemButton>
         </List>
       </SwipeableDrawer>
+      <Modal
+        open={editTodoModalOpened}
+        onClose={closeEditModal}
+        className="tw-flex tw-justify-center tw-items-center">
+        <div className="tw-bg-white tw-p-10 tw-rounded-[20px]">안녕</div>
+      </Modal>
     </>
   );
 }
